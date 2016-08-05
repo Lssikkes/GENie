@@ -22,6 +22,11 @@ else
 OS=windows
 endif
 
+ifdef SystemRoot
+OS=windows
+UNAME = "windows"
+endif
+
 .PHONY: release
 
 GENIE=bin/$(OS)/genie

@@ -107,6 +107,10 @@
 		_p(2,'<ConfigurationType>%s</ConfigurationType>',vc2010.config_type(cfg))
 		_p(2,'<UseDebugLibraries>%s</UseDebugLibraries>', iif(optimisation(cfg) == "Disabled","true","false"))
 
+		if cfg.platform == "Durango" then
+			_p(2,'<ApplicationEnvironment>title</ApplicationEnvironment>')
+		end
+		
 		_p(2,'<PlatformToolset>%s</PlatformToolset>', premake.vstudio.toolset)
 
 		if cfg.flags.MFC then
@@ -365,8 +369,12 @@
 			_p(3,'<StringPooling>true</StringPooling>')
 		end
 
-		if cfg.platform == "Durango" or cfg.flags.NoWinRT then
-			_p(3, '<CompileAsWinRT>false</CompileAsWinRT>')
+		if cfg.platform == "Durango" then
+			if cfg.flags.NoWinRT then
+				_p(3, '<CompileAsWinRT>false</CompileAsWinRT>')
+			else
+				_p(3, '<CompileAsWinRT>true</CompileAsWinRT>')
+			end
 		end
 
 		if cfg.platform ~= "Durango" then
@@ -815,9 +823,11 @@
 			for _, file in ipairs(files) do
 				local translatedpath = path.translate(file.name, "\\")
 				_p(2, '<ClCompile Include=\"%s\">', translatedpath)
-				_p(3, '<ObjectFileName>$(IntDir)%s\\</ObjectFileName>'
-					, premake.esc(path.translate(path.trimdots(path.getdirectory(file.name))))
-					)
+				
+				-- Broken in VS2015! Disables parallel builds due to bug.
+				--_p(3, '<ObjectFileName>$(IntDir)%s\\</ObjectFileName>'
+					--, premake.esc(path.translate(path.trimdots(path.getdirectory(file.name))))
+					--)
 
 				if path.iscxfile(file.name) then
 					_p(3, '<CompileAsWinRT>true</CompileAsWinRT>')
