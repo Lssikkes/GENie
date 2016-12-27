@@ -71,8 +71,13 @@
 			
 				local fname  = premake.esc(cfg.buildtarget.fullpath)
 				local objdir = premake.esc(cfg.objectsdir)
-				local runcmd = cfg.buildtarget.name
+
 				local rundir = cfg.debugdir or cfg.buildtarget.directory
+
+				local absrundir=path.join(cfg.project.location, rundir)
+				local targetdirrel = path.getrelative(absrundir, path.join(cfg.project.location, cfg.buildtarget.directory))
+
+				local runcmd = premake.esc(path.join(targetdirrel, cfg.buildtarget.name))
 				local runargs = table.concat(cfg.debugargs, " ")
 				local pause  = iif(cfg.kind == "WindowedApp", "no", "yes")
 				local includedirs = table.join(cfg.userincludedirs, cfg.includedirs)
@@ -97,8 +102,10 @@
 				for _,v in ipairs(premake.getlinks(cfg, "all", "directory")) do
 					_p('        <LibraryPath Value="%s" />', premake.esc(v))
 				end
-				for _,v in ipairs(premake.getlinks(cfg, "all", "basename")) do
-					_p('        <Library Value="%s" />', premake.esc(v))
+				if prj.kind ~= "StaticLib" then
+					for _,v in ipairs(premake.getlinks(cfg, "all", "basename")) do
+						_p('        <Library Value="%s" />', premake.esc(v))
+					end
 				end
 				_p('      </Linker>')
 				-- end linker block --

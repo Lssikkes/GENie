@@ -37,6 +37,7 @@
 		OptimizeSize   = "-Os",
 		OptimizeSpeed  = "-O3",
 		Symbols        = "-g",
+		Cpp14		   = "-std=c++14",
 	}
 
 	local cxxflags =

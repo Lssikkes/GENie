@@ -3,7 +3,7 @@
 -- Generate a C/C++ project makefile.
 -- Copyright (c) 2002-2013 Jason Perkins and the Premake project
 --
-
+ 
 	premake.make.cpp = { }
 	premake.make.override = { }
 	local cpp = premake.make.cpp
