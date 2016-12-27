@@ -54,7 +54,7 @@ ifeq ($(config),release)
   ALL_CXXFLAGS  += $(CXXFLAGS) $(CFLAGS) $(ALL_CPPFLAGS) $(ARCH) -Wall -Wextra -Os
   ALL_OBJCFLAGS += $(CXXFLAGS) $(CFLAGS) $(ALL_CPPFLAGS) $(ARCH) -Wall -Wextra -Os
   ALL_RESFLAGS  += $(RESFLAGS) $(DEFINES) $(INCLUDES)
-  ALL_LDFLAGS   += $(LDFLAGS) -L. -s -rdynamic
+  ALL_LDFLAGS   += $(LDFLAGS) -L. -s -rdynamic -static
   LDDEPS        +=
   LIBS          += $(LDDEPS) -ldl -lm
   EXTERNAL_LIBS +=
@@ -133,7 +133,7 @@ ifeq ($(config),debug)
   ALL_CXXFLAGS  += $(CXXFLAGS) $(CFLAGS) $(ALL_CPPFLAGS) $(ARCH) -Wall -Wextra -g
   ALL_OBJCFLAGS += $(CXXFLAGS) $(CFLAGS) $(ALL_CPPFLAGS) $(ARCH) -Wall -Wextra -g
   ALL_RESFLAGS  += $(RESFLAGS) $(DEFINES) $(INCLUDES)
-  ALL_LDFLAGS   += $(LDFLAGS) -L. -rdynamic
+  ALL_LDFLAGS   += $(LDFLAGS) -L. -rdynamic -static
   LDDEPS        +=
   LIBS          += $(LDDEPS) -ldl -lm
   EXTERNAL_LIBS +=
