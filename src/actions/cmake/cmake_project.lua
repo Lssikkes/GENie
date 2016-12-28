@@ -24,7 +24,8 @@ function premake.cmake.project(prj)
 	io.indent = "  "
 	_p('cmake_minimum_required(VERSION 2.8.4)')
 	_p('')
-	_p('project(%s)', premake.esc(prj.name))
+	local target=premake.esc(prj.name)
+	_p('project(%s)', target)
 	_p('set(')
 	_p('source_list')
 	cmake.files(prj)
@@ -45,6 +46,13 @@ function premake.cmake.project(prj)
 			for _,v in ipairs(cfg.defines) do
 				_p('add_definitions(-D%s)', premake.esc(v))
 			end
+			for _,v in ipairs(premake.getlinks(cfg, "all", "directory")) do
+				_p('link_directories(%s)', premake.esc(v))
+			end
+			local flags = cfg.buildoptions
+			for _,v in ipairs(flags) do
+				_p('add_definitions(%s)', premake.esc(v))
+			end
 			break
 		end
 		break
@@ -61,5 +69,19 @@ function premake.cmake.project(prj)
 	end
 	if (prj.kind=='WindowedApp') then
 		_p('add_executable(%s ${source_list})',premake.esc(prj.name))
+	end
+
+	for _, platform in ipairs(platforms) do
+		for cfg in premake.eachconfig(prj, platform) do
+			flags = cfg.linkoptions
+			for _,v in ipairs(flags) do
+				_p('target_link_libraries(%s %s)', target, premake.esc(v))
+			end
+			for _,v in ipairs(premake.getlinks(cfg, "all", "basename")) do
+				_p('target_link_libraries(%s %s)', target, premake.esc(v))
+			end
+			break
+		end
+		break
 	end
 end
