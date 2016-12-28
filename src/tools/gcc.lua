@@ -37,7 +37,6 @@
 		OptimizeSize   = "-Os",
 		OptimizeSpeed  = "-O3",
 		Symbols        = "-g",
-		Cpp14		   = "-std=c++14",
 	}
 
 	local cxxflags =
@@ -45,6 +44,7 @@
 		NoExceptions   = "-fno-exceptions",
 		NoRTTI         = "-fno-rtti",
 		UnsignedChar   = "-funsigned-char",
+		Cpp14		   = "-std=c++14",
 	}
 
 

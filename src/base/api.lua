@@ -191,6 +191,7 @@
 					UnsignedChar = 1,
 					UseFullPaths = 1,
 					WinMain = 1,
+					Cpp14 = 1,
 				}
 
 				local englishToAmericanSpelling =

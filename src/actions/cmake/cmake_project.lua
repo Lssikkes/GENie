@@ -25,6 +25,7 @@ function premake.cmake.project(prj)
 	_p('cmake_minimum_required(VERSION 2.8.4)')
 	_p('')
 	local target=premake.esc(prj.name)
+	local tool = premake.gettool(prj)
 	_p('project(%s)', target)
 	_p('set(')
 	_p('source_list')
@@ -49,9 +50,19 @@ function premake.cmake.project(prj)
 			for _,v in ipairs(premake.getlinks(cfg, "all", "directory")) do
 				_p('link_directories(%s)', premake.esc(v))
 			end
-			local flags = cfg.buildoptions
-			for _,v in ipairs(flags) do
-				_p('add_definitions(%s)', premake.esc(v))
+			local flags = {
+				defines   =(tool.getdefines(cfg.defines)),
+				includes  =(table.join(tool.getincludedirs(cfg.includedirs), tool.getquoteincludedirs(cfg.userincludedirs))),
+				cppflags  =(tool.getcppflags(cfg)),
+				cflags    = (table.join(tool.getcflags(cfg), cfg.buildoptions, cfg.buildoptions_c)),
+				cxxflags  = (table.join(tool.getcflags(cfg), tool.getcxxflags(cfg), cfg.buildoptions, cfg.buildoptions_cpp)),
+				objcflags = (table.join(tool.getcflags(cfg), tool.getcxxflags(cfg), cfg.buildoptions, cfg.buildoptions_objc)),
+			}
+			for _,v in ipairs(flags.cflags) do			
+				_p('set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} %s")', premake.esc(v))
+			end
+			for _,v in ipairs(flags.cxxflags) do			
+				_p('set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} %s")', premake.esc(v))
 			end
 			break
 		end
@@ -73,7 +84,7 @@ function premake.cmake.project(prj)
 
 	for _, platform in ipairs(platforms) do
 		for cfg in premake.eachconfig(prj, platform) do
-			flags = cfg.linkoptions
+			local flags = cfg.linkoptions
 			for _,v in ipairs(flags) do
 				_p('target_link_libraries(%s %s)', target, premake.esc(v))
 			end
