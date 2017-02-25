@@ -21,6 +21,9 @@ function cmake.files(prj)
 end
 
 function premake.cmake.project(prj)
+	g_rebasepath = premake.esc(prj.name)
+	function rebasepath(x) return path.rebase(x, "", g_rebasepath) end
+
 	io.indent = "  "
 	_p('cmake_minimum_required(VERSION 2.8.4)')
 	_p('')
@@ -38,17 +41,17 @@ function premake.cmake.project(prj)
 			table.remove(platforms, i)
 		end
 	end 
-	
+
 	for _, platform in ipairs(platforms) do
 		for cfg in premake.eachconfig(prj, platform) do
 			for _,v in ipairs(cfg.includedirs) do
-				_p('include_directories(../%s)', premake.esc(v))
+				_p('include_directories(%s)', premake.esc(rebasepath(v)))
 			end
 			for _,v in ipairs(cfg.defines) do
 				_p('add_definitions(-D%s)', premake.esc(v))
 			end
 			for _,v in ipairs(premake.getlinks(cfg, "all", "directory")) do
-				_p('link_directories(%s)', premake.esc(v))
+				_p('link_directories(%s)', premake.esc(rebasepath(v)))
 			end
 			local flags = {
 				defines   =(tool.getdefines(cfg.defines)),
