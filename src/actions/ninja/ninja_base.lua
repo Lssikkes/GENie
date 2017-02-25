@@ -103,7 +103,8 @@ function new_cfg_proxy(cfg)
 	v.files           = rebasearray(cfg.files, old, new)
 	v.includedirs     = rebasearray(cfg.includedirs, old, new)
 	v.userincludedirs = rebasearray(cfg.userincludedirs, old, new)
-	
+	v.libdirs = rebasearray(cfg.libdirs, old, new)	
+
 	return setmetatable(v, cfg_proxy)
 end
 
