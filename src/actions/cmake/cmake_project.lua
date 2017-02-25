@@ -4,6 +4,8 @@
 -- Copyright (c) 2015 Miodrag Milanovic
 --
 
+fwID = 100000
+
 local cmake = premake.cmake
 local tree = premake.tree
 
@@ -17,7 +19,7 @@ function cmake.files(prj)
 		onleaf = function(node, depth)
 			_p(1, '../%s', node.cfg.name)
 		end,
-	}, true, 1)
+}, true, 1)
 end
 
 function premake.cmake.project(prj)
@@ -85,14 +87,32 @@ function premake.cmake.project(prj)
 		_p('add_executable(%s ${source_list})',premake.esc(prj.name))
 	end
 
+function string.starts(String,Start)
+   return string.sub(String,1,string.len(Start))==Start
+end
+
 	for _, platform in ipairs(platforms) do
 		for cfg in premake.eachconfig(prj, platform) do
 			local flags = cfg.linkoptions
 			for _,v in ipairs(flags) do
 				_p('target_link_libraries(%s %s)', target, premake.esc(v))
 			end
-			for _,v in ipairs(premake.getlinks(cfg, "all", "basename")) do
-				_p('target_link_libraries(%s %s)', target, premake.esc(v))
+
+			local llibflags = premake.getlinks(cfg, "siblings", "basename")
+                        for _,v in ipairs(llibflags) do
+                                _p('target_link_libraries(%s %s)', target, premake.esc(v))
+                        end
+
+			local llibflags = tool.getlinkflags(cfg)
+			for _,v in ipairs(llibflags) do
+				if(string.sub(v, 1, string.len("-framework")) ==  "-framework") then
+					local fwname = string.sub(v, string.len("-framework ")+1)
+					_p("find_library(FRAMEWORK_ID_%s %s)", fwID, fwname)
+					_p("target_link_libraries(%s ${FRAMEWORK_ID_%s})", target, fwID)
+					fwID = fwID + 1
+				else
+					_p('target_link_libraries(%s %s)', target, premake.esc(v))
+				end
 			end
 			break
 		end
