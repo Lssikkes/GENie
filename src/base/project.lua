@@ -327,6 +327,8 @@
 				return premake.iscppproject(target)
 			elseif premake.isdotnetproject(source) then
 				return premake.isdotnetproject(target)
+			elseif premake.isswiftproject(source) then
+				return premake.isswiftproject(source) or premake.iscppproject(source)
 			end
 		end
 
@@ -577,6 +579,8 @@
 			return premake.gcc
 		elseif premake.isdotnetproject(cfg) then
 			return premake.dotnet
+		elseif premake.isswiftproject(cfg) then
+			return premake.swift
 		else
 			return premake.valac
 		end
@@ -606,6 +610,7 @@
         end
 
 		-- Look for matching patterns
+        local matches = {}
 		for replacement, patterns in pairs(prj.vpaths or {}) do
 			for _, pattern in ipairs(patterns) do
 				local i = abspath:find(path.wildcards(pattern))
@@ -650,11 +655,16 @@
 						leaf = path.getname(leaf)
 					end
 
-					vpath = path.join(stem, leaf)
-
+					table.insert(matches, path.join(stem, leaf))
 				end
 			end
 		end
+        
+        if #matches > 0 then
+            -- for the sake of determinism, return the first alphabetically
+            table.sort(matches)
+            vpath = matches[1]
+        end
 
 		return path.trimdots(vpath)
 	end
@@ -721,4 +731,12 @@
 
 	function premake.isvalaproject(prj)
 		return (prj.language == "Vala")
+	end
+
+--
+-- Returns true if the project uses the Swift language.
+--
+
+	function premake.isswiftproject(prj)
+		return (prj.language == "Swift")
 	end

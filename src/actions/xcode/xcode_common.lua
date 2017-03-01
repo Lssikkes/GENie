@@ -23,6 +23,7 @@
 			[".cpp"] = "Sources",
 			[".cxx"] = "Sources",
 			[".dylib"] = "Frameworks",
+			[".bundle"] = "Frameworks",
 			[".framework"] = "Frameworks",
 			[".tbd"] = "Frameworks",
 			[".m"] = "Sources",
@@ -36,6 +37,7 @@
 			[".wav"] = "Resources",
 			[".xcassets"]  = "Resources",
 			[".xcdatamodeld"] = "Sources",
+			[".swift"] = "Sources",
 		}
 		return categories[path.getextension(node.name)]
 	end
@@ -77,6 +79,7 @@
 			[".css"]       = "text.css",
 			[".cxx"]       = "sourcecode.cpp.cpp",
 			[".entitlements"] = "text.xml",
+			[".bundle"]    = "wrapper.cfbundle",
 			[".framework"] = "wrapper.framework",
 			[".tbd"]       = "sourcecode.text-based-dylib-definition",
 			[".gif"]       = "image.gif",
@@ -96,6 +99,7 @@
 			[".wav"]       = "audio.wav",
 			[".xcassets"]  = "folder.assetcatalog",
 			[".xcdatamodeld"] = "wrapper.xcdatamodeld",
+			[".swift"]     = "sourcecode.swift",
 		}
 		return types[path.getextension(node.path)] or "text"
 	end
@@ -117,6 +121,7 @@
 			[".css"]       = "text.css",
 			[".cxx"]       = "sourcecode.cpp.cpp",
 			[".entitlements"] = "text.xml",
+			[".bundle"]    = "wrapper.cfbundle",
 			[".framework"] = "wrapper.framework",
 			[".tbd"]       = "wrapper.framework",
 			[".gif"]       = "image.gif",
@@ -135,6 +140,7 @@
 			[".wav"]       = "audio.wav",
 			[".xcassets"]  = "folder.assetcatalog",
 			[".xcdatamodeld"] = "wrapper.xcdatamodeld",
+			[".swift"]     = "sourcecode.swift",
 		}
 		return types[path.getextension(node.path)] or "text"
 	end
@@ -153,6 +159,7 @@
 			WindowedApp = "com.apple.product-type.application",
 			StaticLib   = "com.apple.product-type.library.static",
 			SharedLib   = "com.apple.product-type.library.dynamic",
+			Bundle      = "com.apple.product-type.bundle",
 		}
 		return types[node.cfg.kind]
 	end
@@ -173,6 +180,7 @@
 			WindowedApp = "wrapper.application",
 			StaticLib   = "archive.ar",
 			SharedLib   = "\"compiled.mach-o.dylib\"",
+			Bundle      = "wrapper.cfbundle",
 		}
 		return types[node.cfg.kind]
 	end
@@ -569,7 +577,7 @@
 
 	function xcode.PBXProject(tr)
 		_p('/* Begin PBXProject section */')
-		_p(2,'08FB7793FE84155DC02AAC07 /* Project object */ = {')
+		_p(2,'__RootObject_ /* Project object */ = {')
 		_p(3,'isa = PBXProject;')
 		_p(3,'buildConfigurationList = 1DEB928908733DD80010E9CD /* Build configuration list for PBXProject "%s" */;', tr.name)
 		_p(3,'compatibilityVersion = "Xcode 3.2";')
@@ -801,6 +809,7 @@
 			WindowedApp = '"$(HOME)/Applications"',
 			SharedLib = '/usr/local/lib',
 			StaticLib = '/usr/local/lib',
+			Bundle    = '"$(LOCAL_LIBRARY_DIR)/Bundles"',
 		}
 		_p(4,'INSTALL_PATH = %s;', installpaths[cfg.kind])
 
@@ -817,7 +826,16 @@
 			_p(4,'INFOPLIST_FILE = "%s";', infoplist_file)
 		end
 
+		if cfg.kind == "Bundle" then
+			_p(4, 'PRODUCT_BUNDLE_IDENTIFIER = "genie.%s";', cfg.buildtarget.basename:gsub("%s+", '.')) --replace spaces with .
+		end
+
 		_p(4,'PRODUCT_NAME = "%s";', cfg.buildtarget.basename)
+
+		if cfg.kind == "Bundle" then
+			_p(4, 'WRAPPER_EXTENSION = bundle;')
+		end
+
 		_p(3,'};')
 		_p(3,'name = "%s";', cfgname)
 		_p(2,'};')
@@ -827,15 +845,37 @@
 	local function cfg_excluded_files(prj, cfg)
 		local excluded = {}
 
+		-- Converts a file path to a pattern with no relative parts, prefixed with `*`.
+		local function exclude_pattern(file)
+			if path.isabsolute(file) then
+				return file
+			end
+
+			-- handle `foo/../bar`
+			local start, term = file:findlast("/%.%./")
+			if term then
+				return path.join("*", file:sub(term + 1))
+			end
+
+			-- handle `../foo/bar`
+			start, term = file:find("%.%./")
+			if start == 1 then
+				return path.join("*", file:sub(term + 1))
+			end
+
+			-- handle `foo/bar`
+			return path.join("*", file)
+		end
+
 		local function add_file(file)
-			local name = path.getname(file)
+			local name = exclude_pattern(file)
 			if not table.icontains(excluded, name) then
 				table.insert(excluded, name)
 			end
 		end
 
 		local function verify_file(file)
-			local name = path.getname(file)
+			local name = exclude_pattern(file)
 			if table.icontains(excluded, name) then
 				-- xcode only allows us to exclude files based on filename, not path...
 				error("'" .. file .. "' would be excluded by the rule to exclude '" .. name .. "'")
@@ -1053,6 +1093,6 @@
 
 	function xcode.Footer()
 		_p(1,'};')
-		_p('\trootObject = 08FB7793FE84155DC02AAC07 /* Project object */;')
+		_p('\trootObject = __RootObject_ /* Project object */;')
 		_p('}')
 	end

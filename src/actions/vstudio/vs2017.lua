@@ -1,28 +1,27 @@
 --
--- vs2013.lua
--- Baseline support for Visual Studio 2013.
--- Copyright (c) 2013 Jason Perkins and the Premake project
+-- vs2015.lua
+-- Baseline support for Visual Studio 2017.
 --
 
-	premake.vstudio.vc2013 = {}
-	local vc2013 = premake.vstudio.vc2013
+	premake.vstudio.vc2017 = {}
+	local vc2017 = premake.vstudio.vc2017
 	local vstudio = premake.vstudio
 
 
 ---
--- Register a command-line action for Visual Studio 2013.
+-- Register a command-line action for Visual Studio 2017.
 ---
 
 	newaction
 	{
-		trigger         = "vs2013",
-		shortname       = "Visual Studio 2013",
-		description     = "Generate Microsoft Visual Studio 2013 project files",
+		trigger         = "vs2017",
+		shortname       = "Visual Studio 2017",
+		description     = "Generate Microsoft Visual Studio 2017 project files",
 		os              = "windows",
 
 		valid_kinds     = { "ConsoleApp", "WindowedApp", "StaticLib", "SharedLib", "Bundle" },
 
-		valid_languages = { "C", "C++", "C#"},
+		valid_languages = { "C", "C++", "C#" },
 
 		valid_tools     = {
 			cc     = { "msc"   },
@@ -56,8 +55,9 @@
 
 		vstudio = {
 			solutionVersion = "12",
-			targetFramework = "4.5",
-			toolsVersion    = "12.0",
-			supports64bitEditContinue = false,
+			targetFramework = "4.5.2",
+			toolsVersion    = "15.0",
+			windowsTargetPlatformVersion = "8.1",
+			supports64bitEditContinue = true,
 		}
 	}

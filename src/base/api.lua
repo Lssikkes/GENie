@@ -42,6 +42,12 @@
 			scope = "config",
 		},
 
+		buildoptions_asm =
+		{
+			kind  = "list",
+			scope = "config",
+		},
+
 		buildoptions_c =
 		{
 			kind  = "list",
@@ -58,6 +64,18 @@
 		{
 			kind  = "list",
 			scope = "config",
+		},
+
+		buildoptions_objcpp =
+		{
+			kind  = "list",
+			scope = "config",
+		},
+
+		clrreferences =
+		{
+			kind = "list",
+			scope = "container",
 		},
 
 		configurations =
@@ -109,9 +127,21 @@
 			scope = "config",
 		},
 
+		deploymode =
+		{
+			kind = "string",
+			scope = "config",
+		},
+
 		excludes =
 		{
 			kind  = "filelist",
+			scope = "config",
+		},
+
+		forcenative =
+		{
+			kind = "filelist",
 			scope = "config",
 		},
 
@@ -224,6 +254,11 @@
 				"3.5",
 				"4.0",
 				"4.5",
+				"4.5.1",
+				"4.5.2",
+				"4.6",
+				"4.6.1",
+				"4.6.2",
 			}
 		},
 
@@ -301,6 +336,13 @@
 			usagecopy = true,
 		},
 
+		usingdirs =
+		{
+			kind  = "dirlist",
+			scope = "config",
+			usagecopy = true,
+		},
+
 		kind =
 		{
 			kind  = "string",
@@ -309,7 +351,8 @@
 				"ConsoleApp",
 				"WindowedApp",
 				"StaticLib",
-				"SharedLib"
+				"SharedLib",
+				"Bundle",
 			}
 		},
 
@@ -322,6 +365,7 @@
 				"C++",
 				"C#",
 				"Vala",
+				"Swift",
 			}
 		},
 
@@ -350,6 +394,7 @@
 				return value
 			end,
 			linkagecopy = true,
+			mergecopiestotail = true,
 		},
 
 		location =
@@ -497,6 +542,18 @@
 			scope = "config",
 		},
 
+		propertysheets =
+		{
+			kind  = "dirlist",
+			scope = "config",
+		},
+		
+		pullmappingfile =
+		{
+			kind  = "path",
+			scope = "config",
+		},
+
 		resdefines =
 		{
 			kind  = "list",
@@ -510,6 +567,12 @@
 		},
 
 		resoptions =
+		{
+			kind  = "list",
+			scope = "config",
+		},
+		
+		sdkreferences =
 		{
 			kind  = "list",
 			scope = "config",
@@ -597,6 +660,30 @@
 			scope = "container",
 		},
 
+		vsimportreferences =
+		{
+			kind = "filelist",
+			scope = "container",
+		},
+
+		-- swift options
+		swiftmodulemaps =
+		{
+			kind  = "filelist",
+			scope = "config",
+		},
+
+		buildoptions_swift =
+		{
+			kind  = "list",
+			scope = "config",
+		},
+
+		linkoptions_swift =
+		{
+			kind  = "list",
+			scope = "config",
+		},
 	}
 
 
@@ -1172,24 +1259,24 @@
 
 		return premake.CurrentGroup
 	end
-    
+
 	function importvsproject(location)
 		if string.find(_ACTION, "vs") ~= 1 then
 			error("Only available for visual studio actions")
 		end
-		
+
 		sln, err = premake.getobject("solution")
 		if not sln then
 			error(err)
 		end
-        
+
 		local group = creategroupsfrompath(premake.CurrentGroup, sln)
-        
+
 		local project = {}
 		project.location = location
 		project.group = group
 		project.flags = {}
-        
+
 		table.insert(sln.importedprojects, project)
     end
 

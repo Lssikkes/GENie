@@ -1,3 +1,8 @@
+--
+-- GENie - Project generator tool
+-- https://github.com/bkaradzic/GENie#license
+--
+
 premake.ninja = { }
 
 local p = premake
@@ -11,10 +16,11 @@ newaction
 	module      = "ninja",
 
 	-- The capabilities of this action
-	valid_kinds     = {"ConsoleApp", "WindowedApp", "SharedLib", "StaticLib"},
-	valid_languages = {"C", "C++"},
+	valid_kinds     = {"ConsoleApp", "WindowedApp", "StaticLib", "SharedLib", "Bundle"},
+	valid_languages = {"C", "C++", "Swift"},
 	valid_tools     = {
-		cc = { "gcc" }
+		cc    = { "gcc" },
+		swift = { "swift" },
 	},
 
 	-- Solution and project generation logic
