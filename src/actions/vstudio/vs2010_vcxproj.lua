@@ -264,6 +264,14 @@
 		_p(2,'</ResourceCompile>')
 
 	end
+	
+	local function project_reference(cfg)
+		_p(2,'<ProjectReference>')
+		if cfg.flags.LoadAllSymbols then
+			_p(3, '<UseLibraryDependencyInputs>true</UseLibraryDependencyInputs>')
+		end
+		_p(2,'</ProjectReference>')
+	end
 
 	local function exceptions(cfg)
 		if cfg.flags.NoExceptions then
@@ -667,6 +675,7 @@
 					,premake.esc(cfginfo.name))
 				vs10_clcompile(cfg)
 				resource_compile(cfg)
+				project_reference(cfg)
 				item_def_lib(cfg)
 				vc2010.link(cfg)
 				event_hooks(cfg)

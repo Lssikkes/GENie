@@ -221,6 +221,9 @@
 					UnsignedChar = 1,
 					UseFullPaths = 1,
 					WinMain = 1,
+					
+					-- ** newly added to Genie
+					LoadAllSymbols = 1,
 					Cpp14 = 1,
 				}
 

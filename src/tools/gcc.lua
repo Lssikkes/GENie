@@ -158,6 +158,11 @@
 				table.insert(result, "-s")
 			end
 		end
+		
+		if cfg.flags.LoadAllSymbols then
+			-- TODO: Improve by using force_load? http://www.chrisgummer.com/llvm-load_all-and-force_load/
+			table.insert(result, "-Wl,-all_load")
+		end
 
 		if cfg.kind == "SharedLib" then
 			if cfg.system == "macosx" then
