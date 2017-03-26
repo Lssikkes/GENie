@@ -161,7 +161,13 @@
 		
 		if cfg.flags.LoadAllSymbols then
 			-- TODO: Improve by using force_load? http://www.chrisgummer.com/llvm-load_all-and-force_load/
-			table.insert(result, "-Wl,-all_load")
+			if cfg.system == "macosx" then
+				-- macosx uses all_load
+				table.insert(result, "-Wl,-all_load")
+			else
+				-- linux uses --whole-archive
+				table.insert(result,"-Wl,--whole-archive")
+			end
 		end
 
 		if cfg.kind == "SharedLib" then
