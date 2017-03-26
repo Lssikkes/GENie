@@ -90,6 +90,11 @@
 				
 		return result
 	end
+
+	function premake.ow.getldflags_post(cfg)
+		local result={}
+		return result
+	end
 		
 	
 --

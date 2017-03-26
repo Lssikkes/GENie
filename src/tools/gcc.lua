@@ -193,6 +193,15 @@
 		return result
 	end
 
+	function premake.gcc.getldflags_post(cfg)
+		local result = {}
+
+                if cfg.flags.LoadAllSymbols and cfg.system ~= "macosx" then
+	                table.insert(result,"-Wl,--no-whole-archive")
+                end
+		return result
+	end
+
 
 --
 -- Return a list of library search paths. Technically part of LDFLAGS but need to

@@ -415,7 +415,7 @@
 	function cpp.linker(prj, cfg, cc)
 		-- Patch #3401184 changed the order
 		_p('  ALL_LDFLAGS        += $(LDFLAGS)%s', make.list(table.join(cc.getlibdirflags(cfg), cc.getldflags(cfg), cfg.linkoptions)))
-
+		_p('  POST_LDFLAGS       += %s', make.list(cc.getldflags_post(cfg)))
 		_p('  LDDEPS             +=%s', make.list(_MAKE.esc(premake.getlinks(cfg, "siblings", "fullpath"))))
 		_p('  LIBS               += $(LDDEPS)%s', make.list(cc.getlinkflags(cfg)))
 		_p('  EXTERNAL_LIBS      +=%s', make.list(cc.getlibfiles(cfg)))
@@ -435,7 +435,7 @@
 			-- $(LIBS) moved to end (http://sourceforge.net/p/premake/bugs/279/)
 
 			local tool = iif(cfg.language == "C", "CC", "CXX")
-			_p('  LINKCMD             = $(%s) -o $(TARGET) $(OBJECTS) $(RESOURCES) $(ARCH) $(ALL_LDFLAGS) $(LIBS)', tool)
+			_p('  LINKCMD             = $(%s) -o $(TARGET) $(OBJECTS) $(RESOURCES) $(ARCH) $(ALL_LDFLAGS) $(LIBS) $(POST_LDFLAGS)', tool)
 
 		end
 	end

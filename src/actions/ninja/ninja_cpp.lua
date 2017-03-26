@@ -66,7 +66,7 @@ local p     = premake
 
 		local link = iif(cfg.language == "C", tool.cc, tool.cxx)
 		_p("rule link")
-		_p("  command = " .. link .. " -o $out @$out.rsp $all_ldflags $libs")
+		_p("  command = " .. link .. " -o $out @$out.rsp $all_ldflags $libs $post_ldflags")
 		_p("  rspfile = $out.rsp")
   		_p("  rspfile_content = $all_outputfiles")
 		_p("  description = link $out")
@@ -235,11 +235,13 @@ local p     = premake
 
 	function cpp.linker(prj, cfg, objfiles, tool)
 		local all_ldflags = ninja.list(table.join(tool.getlibdirflags(cfg), tool.getldflags(cfg), cfg.linkoptions))
+		local post_ldflags = ninja.list(tool.getldflags_post(cfg))
 		local lddeps      = ninja.list(premake.getlinks(cfg, "siblings", "fullpath"))
 		local libs        = lddeps .. " " .. ninja.list(tool.getlinkflags(cfg))
 
 		local function writevars()
 			_p(1, "all_ldflags = " .. all_ldflags)
+			_p(1, "post_ldflags = " .. post_ldflags)
 			_p(1, "libs        = " .. libs)
 			_p(1, "all_outputfiles = " .. table.concat(objfiles, " "))
 		end

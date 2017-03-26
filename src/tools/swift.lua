@@ -132,6 +132,12 @@ function premake.swift.getldflags(cfg)
 	return result
 end
 
+function premake.swift.getldflags_post(cfg)
+	local result={}
+        return result
+end
+
+
 function premake.swift.getlinkflags(cfg)
 	return premake.gcc.getlinkflags(cfg)
 end

@@ -103,6 +103,12 @@
 		return result
 	end
 
+        function premake.ghs.getldflags_post(cfg)
+                local result={}
+                return result
+        end
+
+
 
 --
 -- Return a list of library search paths. Technically part of LDFLAGS but need to
