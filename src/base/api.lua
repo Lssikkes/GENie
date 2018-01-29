@@ -72,6 +72,12 @@
 			scope = "config",
 		},
 
+		buildoptions_vala =
+		{
+			kind  = "list",
+			scope = "config",
+		},
+
 		clrreferences =
 		{
 			kind = "list",
@@ -172,6 +178,7 @@
 			allowed = function(value)
 
 				local allowed_flags = {
+					AntBuildDebuggable = 1,
 					ATL = 1,
 					C7DebugInfo = 1,
 					DebugEnvsDontMerge = 1,
@@ -182,6 +189,7 @@
 					EnableSSE2 = 1,
 					EnableAVX = 1,
 					EnableAVX2 = 1,
+					PedanticWarnings = 1,
 					ExtraWarnings = 1,
 					FatalWarnings = 1,
 					FloatFast = 1,
@@ -207,6 +215,7 @@
 					FastCall = 1,
 					StdCall = 1,
 					SingleOutputDir = 1,
+					ObjcARC = 1,
 					Optimize = 1,
 					OptimizeSize = 1,
 					OptimizeSpeed = 1,
@@ -263,6 +272,24 @@
 				"4.6.1",
 				"4.6.2",
 			}
+		},
+
+		iostargetplatformversion =
+		{
+			kind  = "string",
+			scope = "project",
+		},
+
+		macostargetplatformversion =
+		{
+			kind  = "string",
+			scope = "project",
+		},
+
+		tvostargetplatformversion =
+		{
+			kind  = "string",
+			scope = "project",
 		},
 
 		windowstargetplatformversion =
@@ -489,7 +516,8 @@
 
 				local allowed_options = {
 					ForceCPP = 1,
-					ArchiveSplit = 1
+					ArchiveSplit = 1,
+					SkipBundling = 1
 				}
 
 				local lowervalue = value:lower()
@@ -550,7 +578,7 @@
 			kind  = "dirlist",
 			scope = "config",
 		},
-		
+
 		pullmappingfile =
 		{
 			kind  = "path",
@@ -574,7 +602,7 @@
 			kind  = "list",
 			scope = "config",
 		},
-		
+
 		sdkreferences =
 		{
 			kind  = "list",
@@ -657,6 +685,12 @@
 			scope = "config",
 		},
 
+		vapidirs =
+		{
+			kind  = "dirlist",
+			scope = "config",
+		},
+
 		vpaths =
 		{
 			kind = "keypath",
@@ -685,6 +719,110 @@
 		linkoptions_swift =
 		{
 			kind  = "list",
+			scope = "config",
+		},
+
+		-- Tegra Android options
+		androidtargetapi =
+		{
+			kind = "string",
+			scope = "config",
+		},
+
+		androidminapi =
+		{
+			kind = "string",
+			scope = "config",
+		},
+
+		androidarch =
+		{
+			kind = "string",
+			scope = "config",
+			allowed = {
+				"armv7-a",
+				"armv7-a-hard",
+				"arm64-v8a",
+				"x86",
+				"x86_64",
+			}
+		},
+
+		androidndktoolchainversion =
+		{
+			kind = "string",
+			scope = "config",
+		},
+
+		androidstltype =
+		{
+			kind = "string",
+			scope = "config",
+		},
+
+		androidcppstandard =
+		{
+			kind = "string",
+			scope = "config",
+			allowed = {
+				"c++98",
+				"c++11",
+				"c++1y",
+				"gnu++98",
+				"gnu++11",
+				"gnu++1y",
+			}
+		},
+
+		androidlinker =
+		{
+			kind = "string",
+			scope = "config",
+			allowed = {
+				"bfd",
+				"gold",
+			}
+		},
+
+		androiddebugintentparams =
+		{
+			kind = "list",
+			scope = "config",
+		},
+
+		antbuildjavasourcedirs =
+		{
+			kind = "dirlist",
+			scope = "config",
+		},
+
+		antbuildjardirs =
+		{
+			kind = "dirlist",
+			scope = "config",
+		},
+
+		antbuildjardependencies =
+		{
+			kind = "list",
+			scope = "config",
+		},
+
+		antbuildnativelibdirs =
+		{
+			kind = "dirlist",
+			scope = "config",
+		},
+
+		antbuildnativelibdependencies =
+		{
+			kind = "list",
+			scope = "config",
+		},
+
+		antbuildassetsdirs =
+		{
+			kind = "dirlist",
 			scope = "config",
 		},
 	}
@@ -1082,10 +1220,17 @@
 		table.insert(sln.groups, group)
 		sln.groups[inpath] = group
 
+		-- add to the parent's child list
+		if parent ~= nil then
+			table.insert(parent.groups, group)
+		end
+
 		group.solution = sln
 		group.name = name
 		group.uuid = os.uuid(curpath)
 		group.parent = parent
+		group.projects = { }
+		group.groups = { }
 		return group
 	end
 
@@ -1154,6 +1299,9 @@
 
 		local group = creategroupsfrompath(premake.CurrentGroup, sln)
 
+		if group ~= nil then
+			table.insert(group.projects, prj)
+		end
 
 		prj.solution       = sln
 		prj.name           = name

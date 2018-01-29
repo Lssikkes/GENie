@@ -78,6 +78,10 @@
 		_p('.PHONY: clean prebuild prelink')
 		_p('')
 
+		_p('all: prebuild prelink $(TARGET) | $(TARGETDIR)')
+		_p('\t@:')
+		_p('')
+
 		-- target build rule
 		_p('$(TARGET): $(SOURCES) | $(TARGETDIR)')
 		_p('\t$(SILENT) $(VALAC) -o $(TARGET) --cc=$(CC) $(FLAGS) $(SOURCES)')
@@ -124,8 +128,9 @@
 		_p('  TARGETDIR  = %s', _MAKE.esc(cfg.buildtarget.directory))
 		_p('  TARGET     = $(TARGETDIR)/%s', _MAKE.esc(cfg.buildtarget.name))
 		_p('  DEFINES    +=%s', make.list(valac.getdefines(cfg.defines)))
+		_p('  VAPIDIRS   +=%s', make.list(valac.getvapidirs(cfg.vapidirs)))
 		_p('  PKGS       +=%s', make.list(valac.getlinks(cfg.links)))
-		_p('  FLAGS      += $(DEFINES) $(PKGS)%s', make.list(table.join(valac.getvalaflags(cfg), valac.getbuildoptions(cfg.buildoptions), valac.getbuildoptions(cfg.buildoptions_c))))
+		_p('  FLAGS      += $(DEFINES) $(VAPIDIRS) $(PKGS)%s', make.list(table.join(valac.getvalaflags(cfg), valac.getbuildoptions(cfg.buildoptions), valac.getbuildoptions(cfg.buildoptions_c), cfg.buildoptions_vala)))
 
 		_p('  define PREBUILDCMDS')
 		if #cfg.prebuildcommands > 0 then

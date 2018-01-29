@@ -21,7 +21,7 @@ Download (stable)
 
 [![Build Status](https://travis-ci.org/bkaradzic/GENie.svg?branch=master)](https://travis-ci.org/bkaradzic/GENie)
 
-	version 789 (commit 66e63dbda788c07969a48e99d450acd6d0e114cb)
+	version 882 (commit d28b80a23448863f6c175752a7bef3ea783430ff)
 
 Linux:  
 https://github.com/bkaradzic/bx/raw/master/tools/bin/linux/genie
@@ -48,8 +48,8 @@ Documentation
 History
 -------
 
-Initial version of **GENie** is fork of Premake 4.4 beta 5, and there is no
-intention to keep it compatible with it.
+Initial version of **GENie** is [fork](https://github.com/bkaradzic/GENie/blob/c7e7da4aafe4210aa014a8ae8f6b01ce1d6802f0/README.md#why-fork)
+of Premake 4.4 beta 5, and there is no intention to keep it compatible with it.
 
 ## Changelog (since fork)
 
@@ -113,6 +113,12 @@ intention to keep it compatible with it.
  - Added Swift language support for make and ninja build generators.
  - Removed CodeBlocks and CodeLite support.
  - Added vs2017 support.
+ - Removed vs2008 support.
+ - Added `removeplatforms` that removes VS build target platforms.
+ - Added `PedanticWarnings` flag.
+ - Added `ObjcARC` flag to enable automatic reference counting for Objective-C(++).
+ - Added `iostargetplatformversion`, `macostargetplatformversion`, and
+   `tvostargetplatformversion` to specify XCode OS target version.
 
 Debugging GENie scripts
 -----------------------
@@ -175,11 +181,11 @@ PS3.
 -----------------------------------------------------------------
 
 	GENie
-	Copyright (c) 2014-2016 Branimir Karadžić, Neil Richardson, Mike Popoloski,
+	Copyright (c) 2014-2018 Branimir Karadžić, Neil Richardson, Mike Popoloski,
 	Drew Solomon, Ted de Munnik, Miodrag Milanović, Brett Vickers, Bill Freist,
 	Terry Hendrix II, Ryan Juckett, Andrew Johnson, Johan Sköld,
 	Alastair Murray, Patrick Munns, Jan-Eric Duden, Phil Stevens, Stuart Carnie,
-	Nikolay Aleksiev, Jon Olson.
+	Nikolay Aleksiev, Jon Olson, Mike Fitzgerald, Anders Stenberg.
 	All rights reserved.
 
 	https://github.com/bkaradzic/genie
