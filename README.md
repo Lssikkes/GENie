@@ -21,7 +21,7 @@ Download (stable)
 
 [![Build Status](https://travis-ci.org/bkaradzic/GENie.svg?branch=master)](https://travis-ci.org/bkaradzic/GENie)
 
-	version 882 (commit d28b80a23448863f6c175752a7bef3ea783430ff)
+	version 920 (commit 72290d38680eef8a13332abb5e627183b69ccdf6)
 
 Linux:  
 https://github.com/bkaradzic/bx/raw/master/tools/bin/linux/genie
@@ -119,6 +119,12 @@ of Premake 4.4 beta 5, and there is no intention to keep it compatible with it.
  - Added `ObjcARC` flag to enable automatic reference counting for Objective-C(++).
  - Added `iostargetplatformversion`, `macostargetplatformversion`, and
    `tvostargetplatformversion` to specify XCode OS target version.
+ - Removed the `xcode3` action, and added the `xcode8` and `xcode9` actions.
+ - Added `systemincludedirs` that are always searched after directories added
+   using `includedirs`.
+ - Added `NoRuntimeChecks` flag to disable Basic Runtime Checks in non-optimized
+   Visual Studio builds.
+ - Added support for Nintendo Switch projects.
 
 Debugging GENie scripts
 -----------------------
@@ -176,6 +182,10 @@ derivative of the original Torque Engine.
 
 http://mtuner.net/ is a memory profiler and memory leak finder for Windows, PS4,
 PS3.
+
+Developer Crackshell used GENie for development of games
+[Heroes of Hammerwatch](http://store.steampowered.com/app/677120/Heroes_of_Hammerwatch/), and
+[Serious Sam's Bogus Detour](http://store.steampowered.com/app/272620/Serious_Sams_Bogus_Detour/).
 
 [License](https://github.com/bkaradzic/genie/blob/master/LICENSE)
 -----------------------------------------------------------------

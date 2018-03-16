@@ -26,8 +26,8 @@
 			for _, platform in ipairs(prj.solution.xcode.platforms) do
 				local cfg = premake.getconfig(prj, cfgname, platform)
 				cfg.xcode = {}
-				cfg.xcode.targetid = xcode.newid(prj.xcode.projectnode, cfgname)
-				cfg.xcode.projectid = xcode.newid(tr, cfgname)
+				cfg.xcode.targetid = xcode.newid(prj.xcode.projectnode, "tgt:"..platform..cfgname)
+				cfg.xcode.projectid = xcode.newid(tr, "prj:"..platform..cfgname)
 				table.insert(tr.configs, cfg)
 			end
 		end
@@ -145,33 +145,4 @@
 		node.fxstageid  = xcode.newid(node, "fxs")
 
 		return tr
-	end
-
-
---
--- Generate an Xcode .xcodeproj for a Premake project.
---
--- @param prj
---    The Premake project to generate.
---
-
-	function premake.xcode.project(prj)
-		local tr = xcode.buildprjtree(prj)
-		xcode.Header(tr)
-		xcode.PBXBuildFile(tr)
-		xcode.PBXContainerItemProxy(tr)
-		xcode.PBXFileReference(tr,prj)
-		xcode.PBXFrameworksBuildPhase(tr)
-		xcode.PBXGroup(tr)
-		xcode.PBXNativeTarget(tr)
-		xcode.PBXProject(tr)
-		xcode.PBXReferenceProxy(tr)
-		xcode.PBXResourcesBuildPhase(tr)
-		xcode.PBXShellScriptBuildPhase(tr)
-		xcode.PBXSourcesBuildPhase(tr,prj)
-		xcode.PBXVariantGroup(tr)
-		xcode.PBXTargetDependency(tr)
-		xcode.XCBuildConfiguration(tr, prj)
-		xcode.XCBuildConfigurationList(tr)
-		xcode.Footer(tr)
 	end

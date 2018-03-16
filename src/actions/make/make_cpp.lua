@@ -66,7 +66,7 @@
 		_p('.PHONY: clean prebuild prelink')
 		_p('')
 
-		if os.is("MacOSX") and prj.kind == "WindowedApp" then
+		if os.is("MacOSX") and prj.kind == "WindowedApp" and not prj.options.SkipBundling then
 			_p('all: $(OBJDIRS) $(TARGETDIR) prebuild prelink $(TARGET) $(dir $(TARGETDIR))PkgInfo $(dir $(TARGETDIR))Info.plist')
 		else
 			_p('all: $(OBJDIRS) $(TARGETDIR) prebuild prelink $(TARGET)')
@@ -136,7 +136,7 @@
 		_p('')
 
 		-- Mac OS X specific targets
-		if os.is("MacOSX") and prj.kind == "WindowedApp" then
+		if os.is("MacOSX") and prj.kind == "WindowedApp" and not prj.options.SkipBundling then
 			_p('$(dir $(TARGETDIR))PkgInfo:')
 			_p('$(dir $(TARGETDIR))Info.plist:')
 			_p('')
@@ -300,9 +300,22 @@
 		_p('  ' .. (table.contains(premake.make.override,"TARGETDIR") and "override " or "") .. 'TARGETDIR           = %s', _MAKE.esc(cfg.buildtarget.directory))
 		_p('  ' .. (table.contains(premake.make.override,"TARGET") and "override " or "") ..    'TARGET              = $(TARGETDIR)/%s', _MAKE.esc(cfg.buildtarget.name))
 		_p('  DEFINES            +=%s', make.list(cc.getdefines(cfg.defines)))
-		_p('  INCLUDES           +=%s', make.list(cc.getincludedirs(cfg.includedirs)))
-		_p('  INCLUDES           +=%s', make.list(cc.getquoteincludedirs(cfg.userincludedirs)))
 
+		local id  = make.list(cc.getincludedirs(cfg.includedirs));
+		local uid = make.list(cc.getquoteincludedirs(cfg.userincludedirs))
+		local sid = make.list(cc.getsystemincludedirs(cfg.systemincludedirs))
+
+		if id ~= "" then
+			_p('  INCLUDES           +=%s', id)
+		end
+
+		if uid ~= "" then
+			_p('  INCLUDES           +=%s', uid)
+		end
+
+		if sid ~= "" then
+			_p('  INCLUDES           +=%s', sid)
+		end
 
 		-- set up precompiled headers
 		cpp.pchconfig(cfg)

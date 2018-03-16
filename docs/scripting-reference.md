@@ -63,6 +63,7 @@
     * [resoptions](#resoptionsoptions)
     * [solution](#solutionname)
     * [startproject](#startprojectname)
+    * [systemincludedirs](#systemincludedirspaths)
     * [targetdir](#targetdirpath)
     * [targetextension](#targetextensionext)
     * [targetname](#targetnamename)
@@ -555,6 +556,7 @@ _flags_ - List of flag names from list below. Names are case-insensitive and ign
 * _NoImportLib_ - Prevent the generation of an import library for a Windows DLL.
 * _NoManifest_ - Prevent the generation of a manifest for Windows executables and shared libraries.
 * _NoMultiProcessorCompilation_ - Disables Visual Studio's and FastBuild's multiprocessor compilation.
+* _NoRuntimeChecks_ - Disable Visual Studio's Basic Runtime Checks in Debug builds.
 * _EnableMinimalRebuild_ - Enable Visual Studio's minimal rebuild feature.
 * _NoPCH_ - Disable precompiled headers.
 * _NoRTTI_ - Disable C++ runtime type information.
@@ -1428,6 +1430,31 @@ project "MyProjectFoo"
 
 project "MyProjectBar"
 -- [...]
+```
+[Back to top](#table-of-contents)
+
+---
+### systemincludedirs({_paths_...})
+Specifies the system include file search paths. Multiple calls are concatenated.
+
+For clang/gcc, it maps to setting the include directory using the `-isystem` option.
+
+On the other build systems, it behaves like [includedirs](#includedirspaths),
+but is always searched after directories specified using includedirs.
+
+**Scope:** solutions, projects, configurations
+
+#### Arguments
+_paths_ - list of system include file search directories, relative to the currently-executing script file.
+
+#### Examples
+Define two include file search paths
+```lua
+systemincludedirs { "../lua/include", "../zlib" }
+```
+You can also use [wildcards](#wildcards) to match multiple directories.
+```lua
+systemincludedirs { "../includes/**" }
 ```
 [Back to top](#table-of-contents)
 

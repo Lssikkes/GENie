@@ -157,6 +157,17 @@
 			end
 		end
 
+		if cfg.platform == "NX64" then		
+			_p(2,'<NintendoSdkRoot>$(NINTENDO_SDK_ROOT)</NintendoSdkRoot>')
+			_p(2,'<NintendoSdkSpec>NX</NintendoSdkSpec>')
+			--TODO: Allow specification of the 'Develop' build type
+			if premake.config.isdebugbuild(cfg) then
+				_p(2,'<NintendoSdkBuildType>Debug</NintendoSdkBuildType>')
+			else
+				_p(2,'<NintendoSdkBuildType>Release</NintendoSdkBuildType>')
+			end
+		end
+
 		_p(1,'</PropertyGroup>')
 	end
 
@@ -240,6 +251,10 @@
 				_p(2,'<LinkIncremental>%s</LinkIncremental>', tostring(premake.config.isincrementallink(cfg)))
 			end
 
+			if cfg.applicationdatadir ~= nil then
+				_p(2,'<ApplicationDataDir>%s</ApplicationDataDir>', premake.esc(cfg.applicationdatadir))
+			end
+
 			if cfg.flags.NoManifest then
 				_p(2,'<GenerateManifest>false</GenerateManifest>')
 			end
@@ -275,7 +290,7 @@
 			if escape then
 				defines = defines:gsub('"', '\\"')
 			end
-			
+
 			_p(indent,'<PreprocessorDefinitions>%s;%%(PreprocessorDefinitions)</PreprocessorDefinitions>'
 				,premake.esc(defines))
 		else
@@ -284,7 +299,7 @@
 	end
 
 	local function include_dirs(indent,cfg)
-		local includedirs = table.join(cfg.userincludedirs, cfg.includedirs)
+		local includedirs = table.join(cfg.userincludedirs, cfg.includedirs, cfg.systemincludedirs)
 
 		if #includedirs> 0 then
 			_p(indent,'<AdditionalIncludeDirectories>%s;%%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>'
@@ -305,14 +320,6 @@
 			include_dirs(3,cfg)
 		_p(2,'</ResourceCompile>')
 
-	end
-	
-	local function project_reference(cfg)
-		_p(2,'<ProjectReference>')
-		if cfg.flags.LoadAllSymbols then
-			_p(3, '<UseLibraryDependencyInputs>true</UseLibraryDependencyInputs>')
-		end
-		_p(2,'</ProjectReference>')
 	end
 
 	local function exceptions(cfg)
@@ -487,7 +494,7 @@
 				_p(3,'<OptimizationLevel>O2</OptimizationLevel>')
 			end
 		else
-			_p(3,'<Optimization>%s</Optimization>',optimisation(cfg))
+			_p(3,'<Optimization>%s</Optimization>', optimisation(cfg))
 		end
 
 		include_dirs(3, cfg)
@@ -495,8 +502,10 @@
 		preprocessor(3, cfg)
 		minimal_build(cfg)
 
-		if  not premake.config.isoptimizedbuild(cfg.flags) then
-			if not cfg.flags.Managed then
+		if not premake.config.isoptimizedbuild(cfg.flags) then
+			if cfg.flags.NoRuntimeChecks then
+				_p(3, '<BasicRuntimeChecks>Default</BasicRuntimeChecks>')
+			elseif not cfg.flags.Managed then
 				_p(3, '<BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>')
 			end
 
@@ -507,12 +516,8 @@
 			_p(3, '<StringPooling>true</StringPooling>')
 		end
 
-		if cfg.platform == "Durango" then
-			if cfg.flags.NoWinRT then
-				_p(3, '<CompileAsWinRT>false</CompileAsWinRT>')
-			else
-				_p(3, '<CompileAsWinRT>true</CompileAsWinRT>')
-			end
+		if cfg.platform == "Durango" or cfg.flags.NoWinRT then
+			_p(3, '<CompileAsWinRT>false</CompileAsWinRT>')
 		end
 
 		_p(3, '<RuntimeLibrary>%s</RuntimeLibrary>', runtime(cfg))
@@ -674,7 +679,7 @@
 				, table.concat(premake.esc(table.join(cfg.buildoptions, cfg.buildoptions_asm)), " ")
 				)
 
-			local includedirs = table.join(cfg.userincludedirs, cfg.includedirs)
+			local includedirs = table.join(cfg.userincludedirs, cfg.includedirs, cfg.systemincludedirs)
 
 			if #includedirs > 0 then
 				_p(3, '<IncludePaths>%s;%%(IncludePaths)</IncludePaths>'
@@ -733,6 +738,10 @@
 		if premake.config.isoptimizedbuild(cfg.flags) then
 			_p(3,'<EnableCOMDATFolding>true</EnableCOMDATFolding>')
 			_p(3,'<OptimizeReferences>true</OptimizeReferences>')
+		end
+
+		if cfg.finalizemetasource ~= nil then
+			_p(3,'<FinalizeMetaSource>%s</FinalizeMetaSource>', premake.esc(cfg.finalizemetasource))
 		end
 
 		if cfg.kind ~= 'StaticLib' then
@@ -865,7 +874,6 @@
 					,premake.esc(cfginfo.name))
 				vs10_clcompile(cfg)
 				resource_compile(cfg)
-				project_reference(cfg)
 				item_def_lib(cfg)
 				vc2010.link(cfg)
 				ant_build(prj, cfg)
@@ -1084,43 +1092,28 @@
 			end
 
 			_p(1,'<ItemGroup>')
+			local existingBasenames = {};
 			for _, file in ipairs(files) do
+				-- Having unique ObjectFileName for each file subverts MSBuilds ability to parallelize compilation with the /MP flag.
+				-- Instead we detect duplicates and partition them in subfolders only if needed.
+				local filename = string.lower(path.getbasename(file.name))
+				local disambiguation = existingBasenames[filename] or 0;
+				existingBasenames[filename] = disambiguation + 1
+
 				local translatedpath = path.translate(file.name, "\\")
 				_p(2, '<ClCompile Include=\"%s\">', translatedpath)
-				
-				-- Broken in VS2015! Disables parallel builds due to bug.
-				--_p(3, '<ObjectFileName>$(IntDir)%s\\</ObjectFileName>'
-					--, premake.esc(path.translate(path.trimdots(path.getdirectory(file.name))))
-					--)
 
-				-- Android needs a full path to an object file, not a dir.
-				-- Try to only ugly things up with this if it's necessary.
-				local supportsAndroid = false
-				local supportsNonAndroid = false
-				for _, cfginfo in ipairs(configs) do
-					if cfginfo.src_platform == "TegraAndroid" then
-						supportsAndroid = true
+				for _, vsconfig in ipairs(configs) do
+					-- Android and NX need a full path to an object file, not a dir.
+					local cfg = premake.getconfig(prj, vsconfig.src_buildcfg, vsconfig.src_platform)
+					local namestyle = premake.getnamestyle(cfg)
+					if namestyle == "TegraAndroid" or namestyle == "NX" then
+						_p(3, '<ObjectFileName '.. if_config_and_platform() .. '>$(IntDir)%s.o</ObjectFileName>', premake.esc(vsconfig.name), premake.esc(path.translate(path.trimdots(path.removeext(file.name)))) )
 					else
-						supportsNonAndroid = true
+						if disambiguation > 0 then
+							_p(3, '<ObjectFileName '.. if_config_and_platform() .. '>$(IntDir)%s\\</ObjectFileName>', premake.esc(vsconfig.name), tostring(disambiguation))
+						end
 					end
-				end
-				if supportsAndroid and supportsNonAndroid then
-					_p(3, '<ObjectFileName Condition="\'$(Platform)\'==\'%s\'">$(IntDir)%s\\%%(filename).o</ObjectFileName>'
-						, premake.esc(vstudio.platforms["TegraAndroid"])
-						, premake.esc(path.translate(path.getdirectory(path.trimdots(file.name))))
-						)
-					_p(3, '<ObjectFileName Condition="\'$(Platform)\'!=\'%s\'">$(IntDir)%s\\</ObjectFileName>'
-						, premake.esc(vstudio.platforms["TegraAndroid"])
-						, premake.esc(path.translate(path.getdirectory(path.trimdots(file.name))))
-						)
-				elseif supportsAndroid then
-					_p(3, '<ObjectFileName>$(IntDir)%s\\%%(filename).o</ObjectFileName>'
-						, premake.esc(path.translate(path.getdirectory(path.trimdots(file.name))))
-						)
-				else
-					_p(3, '<ObjectFileName>$(IntDir)%s\\</ObjectFileName>'
-						, premake.esc(path.translate(path.getdirectory(path.trimdots(file.name))))
-						)
 				end
 
 				if path.iscxfile(file.name) then

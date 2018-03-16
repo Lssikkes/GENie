@@ -506,7 +506,7 @@
 				ext = ".lib"
 			end
 		elseif namestyle == "posix" then
-			if kind == "WindowedApp" and system == "macosx" then
+			if kind == "WindowedApp" and system == "macosx" and not cfg.options.SkipBundling then
 				bundlename = name .. ".app"
 				bundlepath = path.join(dir, bundlename)
 				dir = path.join(bundlepath, "Contents/MacOS")
@@ -543,6 +543,17 @@
 			elseif kind == "StaticLib" then
 				prefix = "lib"
 				ext = ".a"
+			end
+		elseif namestyle == "NX" then
+			-- NOTE: it would be cleaner to just output $(TargetExt) for all cases, but
+			-- there is logic elsewhere that assumes a '.' to be present in target name
+			-- such that it can reverse engineer the extension set here.
+			if kind == "ConsoleApp" or kind == "WindowedApp" then
+				ext = ".nspd_root"
+			elseif kind == "StaticLib" then
+				ext = ".a"
+			elseif kind == "SharedLib" then
+				ext = ".nro"
 			end
 		end
 

@@ -210,6 +210,7 @@
 					NoNativeWChar = 1,
 					NoPCH = 1,
 					NoRTTI = 1,
+					NoRuntimeChecks = 1,
 					NoWinMD = 1,    -- explicitly disables Windows Metadata
 					NoWinRT = 1,    -- explicitly disables Windows Runtime Extension
 					FastCall = 1,
@@ -353,6 +354,13 @@
 		},
 
 		includedirs =
+		{
+			kind  = "dirlist",
+			scope = "config",
+			usagecopy = true,
+		},
+
+		systemincludedirs =
 		{
 			kind  = "dirlist",
 			scope = "config",
@@ -580,6 +588,18 @@
 		},
 
 		pullmappingfile =
+		{
+			kind  = "path",
+			scope = "config",
+		},
+		
+		applicationdatadir =
+		{
+			kind  = "path",
+			scope = "config",
+		},
+
+		finalizemetasource =
 		{
 			kind  = "path",
 			scope = "config",
