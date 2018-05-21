@@ -251,7 +251,7 @@
 						return v
 					end
 				end
-				return nil, "invalid flag \"" . value . "\""
+				return nil, "invalid flag \"" .. value .. "\""
 			end,
 		},
 
