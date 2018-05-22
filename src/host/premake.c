@@ -27,6 +27,7 @@ static int process_option(lua_State* L, const char* arg);
 static int load_builtin_scripts(lua_State* L);
 
 int premake_locate(lua_State* L, const char* argv0);
+extern void init_premake_extensions(lua_State* L);
 
 
 /* A search path for script files */
@@ -97,6 +98,8 @@ int premake_init(lua_State* L)
 	/* set the OS platform variable */
 	lua_pushstring(L, PLATFORM_STRING);
 	lua_setglobal(L, "_OS");
+	
+	init_premake_extensions(L);
 
 	return OKAY;
 }

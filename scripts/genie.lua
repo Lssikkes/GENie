@@ -18,7 +18,7 @@
 
 	project "genie"
 		targetname "genie"
-		language "C"
+		language "C++"
 		kind "ConsoleApp"
 		flags {
 			"No64BitChecks",
@@ -85,7 +85,7 @@
 		configuration { "macosx", "gmake" }
 			buildoptions { "-mmacosx-version-min=10.4" }
 			linkoptions  { "-mmacosx-version-min=10.4" }
-
+		configuration "*"
 
 --
 -- A more thorough cleanup.
@@ -97,6 +97,18 @@
 	end
 
 
+
+-- Extension
+	if _OPTIONS['extension'] ~= nil then
+		dofile(_OPTIONS['extension'])
+	else
+		files { "../ext/**.c" }
+	end
+	newoption {
+		trigger = "extension",
+		value   = "path",
+		description = "Extension lua file"
+	}
 
 --
 -- Use the --to=path option to control where the project files get generated. I use
