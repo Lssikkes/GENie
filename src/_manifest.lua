@@ -41,6 +41,12 @@
 		"base/iter.lua",
 		"base/set.lua",
 
+		-- json action
+		"actions/json/json_lib.lua",
+		"actions/json/_json.lua",
+		"actions/json/json_solution.lua",
+		"actions/json/json_project.lua",
+
 		-- CMake action
 		"actions/cmake/_cmake.lua",
 		"actions/cmake/cmake_workspace.lua",
