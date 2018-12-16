@@ -96,6 +96,12 @@
 			scope = "config",
 		},
 
+		debugcmd =
+		{
+			kind = "string",
+			scope = "config",
+		},
+
 		debugargs =
 		{
 			kind = "list",
@@ -181,6 +187,10 @@
 					AntBuildDebuggable = 1,
 					ATL = 1,
 					C7DebugInfo = 1,
+					Cpp11 = 1,
+					Cpp14 = 1,
+					Cpp17 = 1,
+					CppLatest = 1,
 					DebugEnvsDontMerge = 1,
 					DebugEnvsInherit = 1,
 					DeploymentContent = 1,
@@ -209,6 +219,7 @@
 					NoManifest = 1,
 					NoMultiProcessorCompilation = 1,
 					NoNativeWChar = 1,
+					NoOptimizeLink = 1,
 					NoPCH = 1,
 					NoRTTI = 1,
 					NoRuntimeChecks = 1,
@@ -240,6 +251,7 @@
 
 				local englishToAmericanSpelling =
 				{
+				    nooptimiselink = 'nooptimizelink',
 					optimise = 'optimize',
 					optimisesize = 'optimizesize',
 					optimisespeed = 'optimizespeed',
@@ -526,7 +538,8 @@
 				local allowed_options = {
 					ForceCPP = 1,
 					ArchiveSplit = 1,
-					SkipBundling = 1
+					SkipBundling = 1,
+					XcodeScheme = 1,
 				}
 
 				local lowervalue = value:lower()
@@ -593,7 +606,7 @@
 			kind  = "path",
 			scope = "config",
 		},
-		
+
 		applicationdatadir =
 		{
 			kind  = "path",
@@ -722,6 +735,24 @@
 		{
 			kind = "filelist",
 			scope = "container",
+		},
+
+		xcodeprojectopts =
+		{
+			kind = "table",
+			scope = "config",
+		},
+
+		xcodetargetopts =
+		{
+			kind = "table",
+			scope = "config",
+		},
+
+		wholearchive =
+		{
+			kind  = "list",
+			scope = "config",
 		},
 
 		-- swift options

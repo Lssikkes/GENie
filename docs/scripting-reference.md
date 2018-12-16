@@ -16,6 +16,7 @@
     * [configuration](#configurationkeywords)
     * [configurations](#configurationsnames)
     * [custombuildtask](#custombuildtasktask)
+    * [debugcmd](#debugcmdcmd)
     * [debugargs](#debugargsargs)
     * [debugdir](#debugdirpath)
     * [defines](#definessymbols)
@@ -46,6 +47,7 @@
     * [newoption](#newoptionsdescription)
     * [nopch](#nopch)
     * [objdir](#objdirpath)
+    * [options](#optionsoptions)
     * [pchheader](#pchheaderfile)
     * [pchsource](#pchsourcefile)
     * [platforms](#platformsidentifiers)
@@ -73,6 +75,9 @@
     * [userincludedirs](#userincludedirspaths)
     * [uuid](#uuidprojectuuid)
     * [vpaths](#vpathsgroup--pattern)
+    * [xcodeprojectopts](#xcodeprojectoptskey--value-)
+    * [xcodetargetopts](#xcodetargetoptskey--value-)
+    * [wholearchive](#wholearchivereferences)
 * Utility functions
     * [iif](#iifcondition-trueval-falseval)
     * [os.chdir](#oschdirpath)
@@ -382,6 +387,26 @@ custombuildtask {
     }
 ```
 
+[Back to top](#table-of-contents)
+
+---
+### debugcmd(cmd)
+Specifies a command to execute when running under the debugger instead of the build target.
+
+**Note:** Not implemented for Xcode 3, where it must be configured in a per-user config file.
+
+**Note:** In Visual Studio, this can be overridden by a per-user config file (e.g. ProjectName.vcxproj.MYDOMAIN-MYUSERNAME.user).
+
+**Scope:** solutions, projects, configurations
+
+#### Arguments
+_cmd_ - the command to execute when starting with the debugger
+
+#### Examples
+```lua
+configuration 'TestConfig'
+    debugcmd 'D:\\Apps\\Test.exe'
+```
 [Back to top](#table-of-contents)
 
 ---
@@ -1061,6 +1086,23 @@ configuration "Release"
 [Back to top](#table-of-contents)
 
 ---
+### options({_options_...})
+Specifies build flags to modify the compiling or linking process. This differs from `flags` in
+that these are set per project rather than per configuration.
+
+**Scope:** solutions, projects
+
+#### Arguments
+_options_ - List of option names from list below. Names are case-insensitive and ignored if not supported on a platform.
+
+* _ArchiveSplit_ - Split arguments to the gmake archiver across multiple invocations, if there are too many of them.
+* _ForceCPP_ - Force compiling source as C++ despite the file extension suggesting otherwise.
+* _SkipBundling_ - Disable generating bundles for Apple platforms.
+* _XcodeScheme_ - **(Experimental)** Generate an XCode scheme for this project.
+
+[Back to top](#table-of-contents)
+
+---
 ### pchheader(_file_)
 Sets the main header file for precompiled header support.
 
@@ -1628,6 +1670,67 @@ vpaths {
 }
 ```
 [Back to top](#table-of-contents)
+
+---
+### xcodeprojectopts({[_key_] = _value_, ...})
+Sets XCode project options in the generated project files. [List of options.](https://gist.github.com/tkersey/39b4fe69e14b859889ffadccb009e397)
+
+#### Arguments
+_key_ - Name of the option to set
+_value_ - Value to set it to
+
+#### Examples
+```lua
+xcodeprojectopts {
+    ENABLE_BITCODE = "NO",
+    GCC_ENABLE_TRIGRAPHS = "YES",
+}
+```
+[Back to top](#table-of-contents)
+
+---
+### xcodetargetopts({[_key_] = _value_, ...})
+Sets XCode target options in the generated project files. [List of options.](https://gist.github.com/tkersey/39b4fe69e14b859889ffadccb009e397)
+
+#### Arguments
+_key_ - Name of the option to set
+_value_ - Value to set it to
+
+#### Examples
+```lua
+xcodetargetopts {
+    ALWAYS_SEARCH_USER_PATHS = "YES",
+}
+```
+[Back to top](#table-of-contents)
+
+---
+### wholearchive({_references_...})
+Specifies a list of libraries to link without stripping unreferenced object files. The libraries must have already been added using `links`, and the same identifier must be specified.
+
+**Scope:** solutions, projects, configurations
+
+#### Arguments
+_references_ - list of library and project names
+
+#### Examples
+```lua
+project "static_lib"
+    kind "StaticLib"
+
+project "console_app"
+    kind "ConsoleApp"
+    links { "static_lib" }
+    wholearchive { "static_lib" }
+```
+
+#### References
+* [Clang documentation](https://clang.llvm.org/docs/ClangCommandLineReference.html#cmdoption-clang2-force-load)
+* [GNU documentation](https://ftp.gnu.org/old-gnu/Manuals/ld-2.9.1/html_node/ld_3.html#IDX183)
+* [Microsoft documentation](https://docs.microsoft.com/en-us/cpp/build/reference/wholearchive-include-all-library-object-files?view=vs-2017)
+
+[Back to top](#table-of-contents)
+
 
 ---
 ## Utility functions

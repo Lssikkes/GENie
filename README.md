@@ -13,7 +13,7 @@ Supported project generators:
  * GNU Makefile
  * Ninja (experimental)
  * Qbs / QtCreator (experimental)
- * Visual Studio 2008, 2010, 2012, 2013, 2015, 2017
+ * Visual Studio 2010, 2012, 2013, 2015, 2017
  * XCode
 
 Download (stable)
@@ -21,7 +21,7 @@ Download (stable)
 
 [![Build Status](https://travis-ci.org/bkaradzic/GENie.svg?branch=master)](https://travis-ci.org/bkaradzic/GENie)
 
-	version 928 (commit 50de3766101aaf0384e7e3291062177e8c0b8aef)
+	version 991 (commit 0883ed7e5aa3409f48f5cf3bf0e5a96e9dad13fe)
 
 Linux:  
 https://github.com/bkaradzic/bx/raw/master/tools/bin/linux/genie
@@ -119,12 +119,24 @@ of Premake 4.4 beta 5, and there is no intention to keep it compatible with it.
  - Added `ObjcARC` flag to enable automatic reference counting for Objective-C(++).
  - Added `iostargetplatformversion`, `macostargetplatformversion`, and
    `tvostargetplatformversion` to specify XCode OS target version.
- - Removed the `xcode3` action, and added the `xcode8` and `xcode9` actions.
+ - Removed the `xcode3`, and `xcode4` actions.
+ - Added the `xcode8`, `xcode9`, and `xcode10` actions.
  - Added `systemincludedirs` that are always searched after directories added
    using `includedirs`.
  - Added `NoRuntimeChecks` flag to disable Basic Runtime Checks in non-optimized
    Visual Studio builds.
  - Added support for Nintendo Switch projects.
+ - Added flags for selecting C++ standard: `Cpp11`, `Cpp14`, `Cpp17`,
+   and `CppLatest`.
+ - Added `xcodeprojectopts` and `xcodetargetopts`.
+
+build - GENie build system scripts
+----------------------------------
+
+build is a set of build system scripts and related tools, built around
+GENie project generator tool.
+
+https://milostosic.github.io/build/
 
 Debugging GENie scripts
 -----------------------
@@ -195,7 +207,8 @@ Developer Crackshell used GENie for development of games
 	Drew Solomon, Ted de Munnik, Miodrag Milanović, Brett Vickers, Bill Freist,
 	Terry Hendrix II, Ryan Juckett, Andrew Johnson, Johan Sköld,
 	Alastair Murray, Patrick Munns, Jan-Eric Duden, Phil Stevens, Stuart Carnie,
-	Nikolay Aleksiev, Jon Olson, Mike Fitzgerald, Anders Stenberg.
+	Nikolay Aleksiev, Jon Olson, Mike Fitzgerald, Anders Stenberg, Violets,
+	Hugo Amnov.
 	All rights reserved.
 
 	https://github.com/bkaradzic/genie

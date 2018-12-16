@@ -905,17 +905,47 @@ end
 		_p(2,'};')
 	end
 
+	local function add_options(options, extras)
+		for _, tbl in ipairs(extras) do
+			for tkey, tval in pairs(tbl) do
+				options[tkey] = tval
+			end
+		end
+	end
+
+	local function add_wholearchive_links(opts, cfg)
+		if #cfg.wholearchive > 0 then
+			local linkopts = {}
+
+			for _, depcfg in ipairs(premake.getlinks(cfg, "siblings", "object")) do
+				if table.icontains(cfg.wholearchive, depcfg.project.name) then
+					local linkpath = path.rebase(depcfg.linktarget.fullpath, depcfg.location, cfg.location)
+					table.insert(linkopts, "-force_load")
+					table.insert(linkopts, linkpath)
+				end
+			end
+
+			if opts.OTHER_LDFLAGS then
+				linkopts = table.join(linkopts, opts.OTHER_LDFLAGS)
+			end
+
+			opts.OTHER_LDFLAGS = linkopts
+		end
+	end
 
 	function xcode.XCBuildConfiguration(tr, prj, opts)
 		_p('/* Begin XCBuildConfiguration section */')
 		for _, target in ipairs(tr.products.children) do
 			for _, cfg in ipairs(tr.configs) do
 				local values = opts.ontarget(tr, target, cfg)
+				add_options(values, cfg.xcodetargetopts)
 				xcode.XCBuildConfiguration_Impl(tr, cfg.xcode.targetid, values, cfg)
 			end
 		end
 		for _, cfg in ipairs(tr.configs) do
 			local values = opts.onproject(tr, prj, cfg)
+			add_options(values, cfg.xcodeprojectopts)
+			add_wholearchive_links(values, cfg)
 			xcode.XCBuildConfiguration_Impl(tr, cfg.xcode.projectid, values, cfg)
 		end
 		_p('/* End XCBuildConfiguration section */')
