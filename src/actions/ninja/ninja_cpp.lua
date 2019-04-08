@@ -66,7 +66,7 @@ local p     = premake
 
 		local link = iif(cfg.language == "C", tool.cc, tool.cxx)
 		_p("rule link")
-		_p("  command = $pre_link " .. link .. " -o $out @$out.rsp $all_ldflags $libs $post_build")
+		_p("  command = " .. link .. " -o $out @$out.rsp $all_ldflags $libs $post_build")
 		_p("  rspfile = $out.rsp")
   		_p("  rspfile_content = $all_outputfiles")
 		_p("  description = link $out")
@@ -287,7 +287,7 @@ local p     = premake
 				local extra_deps = #cfg.extra_deps and '| ' .. table.concat(cfg.extra_deps[objfilename] or {}, ' ') or ''
 				local order_deps = #cfg.order_deps and '|| ' .. table.concat(cfg.order_deps[objfilename] or {}, ' ') or ''
 				local extra_flags = #cfg.extra_flags and ' ' .. table.concat(cfg.extra_flags[objfilename] or {}, ' ') or ''
-		
+
 				local cflags = "cflags"
 				if path.isobjcfile(file) then
 					_p("build " .. objfilename .. ": cxx " .. file .. extra_deps .. order_deps)
@@ -301,7 +301,7 @@ local p     = premake
 					_p("build " .. objfilename .. ": cxx " .. file .. extra_deps .. order_deps)
 					cflags = "cxxflags"
 				end
-	
+
 				_p(1, "flags    = " .. flags[cflags] .. extra_flags)
 				_p(1, "includes = " .. flags.includes)
 				_p(1, "defines  = " .. flags.defines)
