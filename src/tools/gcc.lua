@@ -6,6 +6,7 @@
 
 
 	premake.gcc = { }
+	premake.gcc.style = "gcc"
 
 
 --
@@ -17,6 +18,7 @@
 	premake.gcc.ar     = "ar"
 	premake.gcc.rc     = "windres"
 	premake.gcc.llvm   = false
+	premake.gcc.link_output = "-o "
 
 
 --
@@ -177,7 +179,7 @@
 				table.insert(result, "-s")
 			end
 		end
-		
+
 		if cfg.flags.LoadAllSymbols then
 			-- TODO: Improve by using force_load? http://www.chrisgummer.com/llvm-load_all-and-force_load/
 			if cfg.system == "macosx" then

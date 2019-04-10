@@ -16,6 +16,7 @@
 		description = "Choose a C/C++ compiler set",
 		allowed = {
 			{ "gcc", "GNU GCC (gcc/g++)" },
+			{ "cl", "Win32 CL.exe (CL.exe / LINK.exe)" },
 			{ "ow",  "OpenWatcom"        },
 			{ "ghs", "Green Hills Software" },
 		}

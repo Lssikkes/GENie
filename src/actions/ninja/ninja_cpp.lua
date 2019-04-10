@@ -46,27 +46,49 @@ local p     = premake
 
 		_p("")
 
-		_p("# core rules for " .. cfg.name)
-		_p("rule cc")
-		_p("  command = " .. tool.cc .. " $defines $includes $flags -MMD -MF $out.d -c -o $out $in")
-		_p("  description = cc $out")
-		_p("  depfile = $out.d")
-		_p("  deps = gcc")
-		_p("")
-		_p("rule cxx")
-		_p("  command = " .. tool.cxx .. " $defines $includes $flags -MMD -MF $out.d -c -o $out $in")
-		_p("  description = cxx $out")
-		_p("  depfile = $out.d")
-		_p("  deps = gcc")
-		_p("")
-		_p("rule ar")
-		_p("  command = " .. tool.ar .. " $flags $out $in $libs " .. (os.is("MacOSX") and " 2>&1 > /dev/null | sed -e '/.o) has no symbols$$/d'" or ""))
-		_p("  description = ar $out")
-		_p("")
+		if tool.style == "gcc" then
+			_p("# core rules for " .. cfg.name)
+			_p("rule cc")
+			_p("  command = " .. tool.cc .. " $defines $includes $flags -MMD -MF $out.d -c -o $out $in")
+			_p("  description = cc $out")
+			_p("  depfile = $out.d")
+			_p("  deps = gcc")
+			_p("")
+			_p("rule cxx")
+			_p("  command = " .. tool.cxx .. " $defines $includes $flags -MMD -MF $out.d -c -o $out $in")
+			_p("  description = cxx $out")
+			_p("  depfile = $out.d")
+			_p("  deps = gcc")
+			_p("")
+			_p("rule ar")
+			_p("  command = " .. tool.ar .. " $flags $out $in $libs " .. (os.is("MacOSX") and " 2>&1 > /dev/null | sed -e '/.o) has no symbols$$/d'" or ""))
+			_p("  description = ar $out")
+			_p("")
+		end
 
-		local link = iif(cfg.language == "C", tool.cc, tool.cxx)
+		if tool.style == "cl" then
+			local function _gen_compilerRules(tool)
+				_p("  command = " .. tool.cc .. " /showIncludes $defines $includes $flags $in /Fo\"$out\"")
+				_p("  description = cc $out")
+				_p("  deps = msvc")
+			end
+			_p("# core rules for " .. cfg.name)
+			_p("rule cc")
+			_gen_compilerRules(tool)
+			_p("")
+			_p("rule cxx")
+			_gen_compilerRules(tool)
+			_p("rule ar")
+			_p("  command = " .. tool.ar .. " " .. tool.link_output .. "$out @$out.rsp $flags $libs $post_build")
+			_p("  rspfile = $out.rsp")
+			_p("  rspfile_content = $all_outputfiles")
+			_p("  description = link $out")
+			_p("")
+		end
+
+		local link = iif(tool.link ~= nil, tool.link, iif(cfg.language == "C", tool.cc, tool.cxx))
 		_p("rule link")
-		_p("  command = " .. link .. " -o $out @$out.rsp $all_ldflags $libs $post_build")
+		_p("  command = " .. link .. " " .. tool.link_output .. "$out @$out.rsp $all_ldflags $libs $post_build")
 		_p("  rspfile = $out.rsp")
   		_p("  rspfile_content = $all_outputfiles")
 		_p("  description = link $out")
@@ -106,7 +128,7 @@ local p     = premake
 
 		for _, file in ipairs(cfg.files) do
 			if path.issourcefile(file) then
-				table.insert(objfiles, cpp.objectname(cfg, file))
+				table.insert(objfiles, cpp.objectname(prj, cfg, file))
 			end
 		end
 		_p('')
@@ -207,7 +229,7 @@ local p     = premake
 		for _, dependency in ipairs(prj.dependency or {}) do
 			for _, dep in ipairs(dependency or {}) do
 				-- This is assuming that the depending object is (going to be) an .o file
-				local objfilename = cpp.objectname(cfg, path.getrelative(prj.location, dep[1]))
+				local objfilename = cpp.objectname(prj, cfg, path.getrelative(prj.location, dep[1]))
 				local dependency = path.getrelative(cfg.location, dep[2])
 
 				-- ensure a table exists for the dependent object file
@@ -221,7 +243,7 @@ local p     = premake
 
 		local pchfilename = cfg.pchheader_full and cpp.pchname(cfg, cfg.pchheader_full) or ''
 		for _, file in ipairs(cfg.files) do
-			local objfilename = file == cfg.pchheader and cpp.pchname(cfg, file) or cpp.objectname(cfg, file)
+			local objfilename = file == cfg.pchheader and cpp.pchname(cfg, file) or cpp.objectname(prj, cfg, file)
 			if path.issourcefile(file) or file == cfg.pchheader then
 				if #cfg.prebuildcommands > 0 then
 					if order_deps[objfilename] == nil then
@@ -255,8 +277,13 @@ local p     = premake
 		cfg.extra_flags = extra_flags
 	end
 
-	function cpp.objectname(cfg, file)
-		return path.join(cfg.objectsdir, path.trimdots(path.removeext(file)) .. ".o")
+	function cpp.objectname(prj, cfg, file)
+		local tool = premake.gettool(prj)
+		if(tool.namestyle == "windows") then
+			return path.join(cfg.objectsdir, path.trimdots(path.removeext(file)) .. ".obj")
+		else
+			return path.join(cfg.objectsdir, path.trimdots(path.removeext(file)) .. ".o")
+		end
 	end
 
 	function cpp.pchname(cfg, file)
@@ -283,7 +310,7 @@ local p     = premake
 				_p(1, "includes = " .. flags.includes)
 				_p(1, "defines  = " .. flags.defines)
 			elseif path.issourcefile(file) then
-				local objfilename = cpp.objectname(cfg, file)
+				local objfilename = cpp.objectname(prj, cfg, file)
 				local extra_deps = #cfg.extra_deps and '| ' .. table.concat(cfg.extra_deps[objfilename] or {}, ' ') or ''
 				local order_deps = #cfg.order_deps and '|| ' .. table.concat(cfg.order_deps[objfilename] or {}, ' ') or ''
 				local extra_flags = #cfg.extra_flags and ' ' .. table.concat(cfg.extra_flags[objfilename] or {}, ' ') or ''
@@ -352,7 +379,6 @@ local p     = premake
 		else
 			p.error("ninja action doesn't support this kind of target " .. cfg.kind)
 		end
-
 	end
 
 
