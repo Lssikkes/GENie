@@ -114,11 +114,7 @@
 			if (cfg.flags.C7DebugInfo) then
 				table.insert(compileroptions, '/Z7')
 			else
-				if premake.config.iseditandcontinue(cfg) then
-					table.insert(compileroptions, '/ZI')
-				else
-					table.insert(compileroptions, '/Zi')
-				end
+				table.insert(compileroptions, '/Zi')
 				local targetdir = add_trailing_slash(cfg.buildtarget.directory)
 				table.insert(compileroptions, string.format("/Fd\"%s%s.pdb\"", targetdir, cfg.buildtarget.basename))
 			end
@@ -140,14 +136,19 @@
 			if cfg.flags.NoOptimizeLink and cfg.flags.NoEditAndContinue then
 				table.insert(compileroptions, '/GF-')
 				table.insert(compileroptions, '/Gy-')
-			else
-				table.insert(compileroptions, '/GF')
-				table.insert(compileroptions, '/Gy')
 			end
 		else
 			table.insert(compileroptions, '/Gy')
 			table.insert(compileroptions, '/Od')
-			table.insert(compileroptions, '/RTC1')
+			if not cfg.flags.NoRuntimeChecks then
+				table.insert(compileroptions, '/RTC1')
+			end
+		end
+
+		if cfg.flags.NoBufferSecurityCheck then
+			table.insert(compileroptions, '/GS-')
+		else
+			table.insert(compileroptions, '/GS')
 		end
 
 		if cfg.flags.FatalWarnings then
@@ -225,9 +226,30 @@
 	function premake.cl.getldflags(cfg)
 		local result = { }
 
-		if not cfg.flags.Symbols then
-			-- not implemented.
-			--table.insert(result, "-s")
+		-- silence "linking as no debug info" nonsense
+		table.insert(result, "/IGNORE:4099")
+
+		if cfg.flags.Symbols then
+			if cfg.flags.FullSymbols then
+				table.insert(result, "/DEBUG:FULL")
+			else
+				table.insert(result, "/DEBUG")
+			end
+		end
+
+		local preferOptimize = false
+		if cfg.flags.Optimize or cfg.flags.OptimizeSize or cfg.flags.OptimizeSpeed then
+			preferOptimize = true
+		end
+
+		if cfg.flags.NoOptimizeLink or preferOptimize == false then
+			table.insert(result, "/OPT:NOREF")
+			table.insert(result, "/OPT:NOICF")
+			table.insert(result, "/OPT:NOLBR")
+		else
+			table.insert(result, "/OPT:REF")
+			table.insert(result, "/OPT:ICF")
+			table.insert(result, "/OPT:LBR")
 		end
 
 		if cfg.flags.LoadAllSymbols then
@@ -346,6 +368,10 @@
 	function premake.cl.getarchiveflags(prj, cfg, ndx)
 		local result = {}
 		table.insert(result, "/NOLOGO")
+
+		-- silence "This object file does not define any previously undefined public symbols, so it will not be used by any link operation that consumes this library" nonsense
+		table.insert(result, "/IGNORE:4221")
+
 		return result
 	end
 
